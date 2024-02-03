@@ -87,7 +87,7 @@ form {
 }
 
 label {
-  display: block;
+  display: flex;
   font-size: 18px;
   margin-bottom: 10px;
 }
@@ -111,8 +111,7 @@ input[type="submit"] {
   border-radius: 4px;
   cursor: pointer;
 }
-.listaAgendamento[]
-{
+.listaAgendamento{
   font-family: sans-serif;
   background-color: #a579c1;
   color: white;
