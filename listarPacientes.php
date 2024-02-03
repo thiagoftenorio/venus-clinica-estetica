@@ -1,22 +1,36 @@
 <?php
 session_start();
 
-// Inicialize $_SESSION['listarPacientes'] como um array vazio se não estiver definido
-if (!isset($_SESSION['listarPacientes'])) {
-    $_SESSION['listarPacientes'] = array();
+// Conectar ao banco de dados (substitua as credenciais conforme necessário)
+$dsn = 'mysql:host=localhost;dbname=venus';
+$usuario_bd = 'root';
+$senha_bd = '';
+
+try {
+    $conexao = new PDO($dsn, $usuario_bd, $senha_bd);
+    $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo 'Erro na conexão com o banco de dados: ' . $e->getMessage();
+    exit();
 }
 
+// Inicializar $_SESSION['listarPacientes'] com dados do banco de dados
+$query = $conexao->query('SELECT * FROM pacientes');
+$_SESSION['listarPacientes'] = $query->fetchAll(PDO::FETCH_ASSOC);
+
 if (isset($_POST['deletar'])) {
-    echo $_POST['indice'];
-    unset($_SESSION['listarPacientes'][$_POST['indice']]);
+    $indice = $_POST['indice'];
+    unset($_SESSION['listarPacientes'][$indice]);
 }
-if(isset($_POST['editar'])){
-    /*  echo '<pre>';
-     print_r($_SESSION['lstUsuario']);
-     echo '</pre>'; */
-     echo $_POST['indice'];
-     header('Location: editarPaciente.php?id='.$_POST['indice']);
- }
+
+if (isset($_POST['editar'])) {
+    $indice = $_POST['indice'];
+    header("Location: editarPaciente.php?indice=$indice");
+    exit();
+}
+
+// Fechar a conexão no final do script
+$conexao = null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
