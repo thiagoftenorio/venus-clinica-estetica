@@ -1,22 +1,36 @@
 <?php
 session_start();
 
-// Inicialize $_SESSION['listarPacientes'] como um array vazio se não estiver definido
-if (!isset($_SESSION['listarPacientes'])) {
-    $_SESSION['listarPacientes'] = array();
+// Conectar ao banco de dados (substitua as credenciais conforme necessário)
+$dsn = 'mysql:host=localhost;dbname=venus';
+$usuario_bd = 'root';
+$senha_bd = '';
+
+try {
+    $conexao = new PDO($dsn, $usuario_bd, $senha_bd);
+    $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo 'Erro na conexão com o banco de dados: ' . $e->getMessage();
+    exit();
 }
 
+// Inicializar $_SESSION['listarPacientes'] com dados do banco de dados
+$query = $conexao->query('SELECT * FROM pacientes');
+$_SESSION['listarPacientes'] = $query->fetchAll(PDO::FETCH_ASSOC);
+
 if (isset($_POST['deletar'])) {
-    echo $_POST['indice'];
-    unset($_SESSION['listarPacientes'][$_POST['indice']]);
+    $indice = $_POST['indice'];
+    unset($_SESSION['listarPacientes'][$indice]);
 }
-if(isset($_POST['editar'])){
-    /*  echo '<pre>';
-     print_r($_SESSION['lstUsuario']);
-     echo '</pre>'; */
-     echo $_POST['indice'];
-     header('Location: editarPaciente.php?id='.$_POST['indice']);
- }
+
+if (isset($_POST['editar'])) {
+    $indice = $_POST['indice'];
+    header("Location: editarPaciente.php?indice=$indice");
+    exit();
+}
+
+// Fechar a conexão no final do script
+$conexao = null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,53 +64,51 @@ if(isset($_POST['editar'])){
 
 
 
-<main>
-
-<table class = "tabela">
-    <tr>
-        <th>id</th>
-        <th>Nome</th>
-        <th>E-mail</th>
-        <th>Mensagem</th>
-        <th>CPF</th>
-        <th>Data</th>
-        <th>Profissional</th>
-        <th>Procedimento</th>
-        <th>Editar</th>
-        <th>Deletar</th>
-    </tr>
-
-
-
-
-    <?php
-        foreach ($_SESSION['listarPacientes'] as $key => $value) {
-            echo "<form action='' method='post'>";
-            echo "<tr>";
-            echo "<td>".$key."</td>";
-            echo "<td>".$value['nome']."</td>";
-            echo "<td>".$value['email']."</td>";
-            echo "<td>".$value['mensagem']."</td>";
-            echo "<td>".$value['cpf']."</td>";
-            echo "<td>".$value['data']."</td>";
-            echo "<td>".$value['profissional']."</td>";
-            echo "<td>".$value['procedimento']."</td>";
-            echo "<td ><input type='submit' name='editar' value='Editar' class='botao-editar'/></td>";
-            echo "<td><input type='submit' name='deletar' value='Deletar' class='botao-deletar'/></td>";
-            echo "<input type='hidden' name='indice' value='$key'/>";
-            echo "<input type='hidden' name='nome' value='" . $value['nome'] . "'>";
-            echo "<input type='hidden' name='email' value='" . $value['email'] . "'>";
-            echo "<input type='hidden' name='mensagem' value='" . $value['mensagem'] . "'>";
-            echo "<input type='hidden' name='cpf' value='" . $value['cpf'] . "'>";
-            echo "<input type='hidden' name='data' value='" . $value['data'] . "'>";
-            echo "<input type='hidden' name='profissional' value='" . $value['profissional'] . "'>";
-            echo "<input type='hidden' name='procedimento' value='" . $value['procedimento'] . "'>";
-            echo "</tr>";
-            echo "</form>";
-        }
-    ?>
-</table>
-    </main>
+ <form action='' method='post'>
+    <table>
+        <thead>
+            <tr>
+                <!-- Cabeçalhos da tabela -->
+                <th>Índice</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Mensagem</th>
+                <th>CPF</th>
+                <th>Data</th>
+                <th>Profissional</th>
+                <th>Procedimento</th>
+                <th>Editar</th>
+                <th>Deletar</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            foreach ($_SESSION['listarPacientes'] as $key => $value) {
+                echo "<tr>";
+                echo "<td>".$key."</td>";
+                echo "<td>".$value['nome']."</td>";
+                echo "<td>".$value['email']."</td>";
+                echo "<td>".$value['mensagem']."</td>";
+                echo "<td>".$value['cpf']."</td>";
+                echo "<td>".$value['data']."</td>";
+                echo "<td>".$value['profissional']."</td>";
+                echo "<td>".$value['procedimento']."</td>";
+                echo "<td><input type='submit' name='editar' value='Editar' class='botao-editar'/></td>";
+                echo "<td><input type='submit' name='deletar' value='Deletar' class='botao-deletar'/></td>";
+                echo "<input type='hidden' name='indice' value='$key'/>";
+                echo "<input type='hidden' name='nome' value='" . $value['nome'] . "'>";
+                echo "<input type='hidden' name='email' value='" . $value['email'] . "'>";
+                echo "<input type='hidden' name='mensagem' value='" . $value['mensagem'] . "'>";
+                echo "<input type='hidden' name='cpf' value='" . $value['cpf'] . "'>";
+                echo "<input type='hidden' name='data' value='" . $value['data'] . "'>";
+                echo "<input type='hidden' name='profissional' value='" . $value['profissional'] . "'>";
+                echo "<input type='hidden' name='procedimento' value='" . $value['procedimento'] . "'>";
+                echo "</tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</form>
 
 
 <div class="rodape" id="contato">
