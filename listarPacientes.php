@@ -18,10 +18,27 @@ try {
 $query = $conexao->query('SELECT * FROM pacientes');
 $_SESSION['listarPacientes'] = $query->fetchAll(PDO::FETCH_ASSOC);
 
-if (isset($_POST['deletar'])) {
-    $indice = $_POST['indice'];
-    unset($_SESSION['listarPacientes'][$indice]);
+// ... (código existente)
+
+if (isset($_GET['deletar'])) {
+    $indiceDeletar = $_GET['deletar'];
+
+    // Obtenha o ID do paciente que deseja deletar
+    $idPacienteDeletar = $_SESSION['listarPacientes'][$indiceDeletar]['id'];
+
+    // Execute a exclusão no banco de dados
+    $queryDelete = $conexao->prepare('DELETE FROM pacientes WHERE id=:id');
+    $queryDelete->bindParam(':id', $idPacienteDeletar, PDO::PARAM_INT);
+    $queryDelete->execute();
+
+    // Remova o paciente da lista de sessão
+    unset($_SESSION['listarPacientes'][$indiceDeletar]);
+
+    // Redirecione de volta à página principal
+    header('Location: listarPacientes.php');
+    exit();
 }
+
 
 if (isset($_POST['editar'])) {
     $indice = $_POST['indice'];
@@ -64,51 +81,53 @@ $conexao = null;
 
 
 
- <form action='' method='post'>
-    <table>
-        <thead>
-            <tr>
-                <!-- Cabeçalhos da tabela -->
-                <th>Índice</th>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Mensagem</th>
-                <th>CPF</th>
-                <th>Data</th>
-                <th>Profissional</th>
-                <th>Procedimento</th>
-                <th>Editar</th>
-                <th>Deletar</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            foreach ($_SESSION['listarPacientes'] as $key => $value) {
-                echo "<tr>";
-                echo "<td>".$key."</td>";
-                echo "<td>".$value['nome']."</td>";
-                echo "<td>".$value['email']."</td>";
-                echo "<td>".$value['mensagem']."</td>";
-                echo "<td>".$value['cpf']."</td>";
-                echo "<td>".$value['data']."</td>";
-                echo "<td>".$value['profissional']."</td>";
-                echo "<td>".$value['procedimento']."</td>";
-                echo "<td><input type='submit' name='editar' value='Editar' class='botao-editar'/></td>";
-                echo "<td><input type='submit' name='deletar' value='Deletar' class='botao-deletar'/></td>";
-                echo "<input type='hidden' name='indice' value='$key'/>";
-                echo "<input type='hidden' name='nome' value='" . $value['nome'] . "'>";
-                echo "<input type='hidden' name='email' value='" . $value['email'] . "'>";
-                echo "<input type='hidden' name='mensagem' value='" . $value['mensagem'] . "'>";
-                echo "<input type='hidden' name='cpf' value='" . $value['cpf'] . "'>";
-                echo "<input type='hidden' name='data' value='" . $value['data'] . "'>";
-                echo "<input type='hidden' name='profissional' value='" . $value['profissional'] . "'>";
-                echo "<input type='hidden' name='procedimento' value='" . $value['procedimento'] . "'>";
-                echo "</tr>";
-            }
-            ?>
-        </tbody>
-    </table>
-</form>
+<main>
+
+<table class = "tabela">
+    <tr>
+        <th>id</th>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Mensagem</th>
+        <th>CPF</th>
+        <th>Data</th>
+        <th>Profissional</th>
+        <th>Procedimento</th>
+        <th>Editar</th>
+        <th>Deletar</th>
+    </tr>
+
+
+
+
+    <?php
+        foreach ($_SESSION['listarPacientes'] as $key => $value) {
+            echo "<form action='' method='post'>";
+            echo "<tr>";
+            echo "<td>".$value['id']."</td>";
+            echo "<td>".$value['nome']."</td>";
+            echo "<td>".$value['email']."</td>";
+            echo "<td>".$value['mensagem']."</td>";
+            echo "<td>".$value['cpf']."</td>";
+            echo "<td>".$value['data']."</td>";
+            echo "<td>".$value['profissional']."</td>";
+            echo "<td>".$value['procedimento']."</td>";
+            echo "<td><a href='editarPaciente.php?id=" . $value['id'] . "'>Editar</a></td>";
+            echo "<td><a href='listarPacientes.php?deletar=$key'>Deletar</a></td>";
+            echo "<input type='hidden' name='indice' value='$key'/>";
+            echo "<input type='hidden' name='nome' value='" . $value['nome'] . "'>";
+            echo "<input type='hidden' name='email' value='" . $value['email'] . "'>";
+            echo "<input type='hidden' name='mensagem' value='" . $value['mensagem'] . "'>";
+            echo "<input type='hidden' name='cpf' value='" . $value['cpf'] . "'>";
+            echo "<input type='hidden' name='data' value='" . $value['data'] . "'>";
+            echo "<input type='hidden' name='profissional' value='" . $value['profissional'] . "'>";
+            echo "<input type='hidden' name='procedimento' value='" . $value['procedimento'] . "'>";
+            echo "</tr>";
+            echo "</form>";
+        }
+    ?>
+</table>
+    </main>
 
 
 <div class="rodape" id="contato">

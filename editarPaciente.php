@@ -1,5 +1,6 @@
 <?php
 session_start();
+$mensagemErro = '';
 
 // Conectar ao banco de dados (substitua as credenciais conforme necessário)
 $dsn = 'mysql:host=localhost;dbname=venus';
@@ -14,10 +15,8 @@ try {
     exit();
 }
 
-if (isset($_POST['salvarEdicao'])) {
-    $indice = $_POST['indice'];
-
-    // Obtenha os dados editados do formulário
+if (isset($_POST['editar'])) {
+    $id = isset($_GET['id']) ? $_GET['id'] : null;
     $nome = $_POST['nome'];
     $email = $_POST['email'];
     $mensagem = $_POST['mensagem'];
@@ -26,25 +25,43 @@ if (isset($_POST['salvarEdicao'])) {
     $profissional = $_POST['profissional'];
     $procedimento = $_POST['procedimento'];
 
-    // Atualize os dados no banco de dados
-    $query = $conexao->prepare('UPDATE pacientes SET nome=?, email=?, mensagem=?, cpf=?, data=?, profissional=?, procedimento=? WHERE id=?');
-    $query->execute([$nome, $email, $mensagem, $cpf, $data, $profissional, $procedimento, $indice]);
+    // Validar os campos
+    if ($nome == '' || $email == '' || $cpf == '' || $data == '') {
+        $mensagemErro .= 'Nome, E-mail, CPF e Data são campos obrigatórios.<br/>';
+    }
 
-    // Redirecione de volta à página principal
-    header('Location: listarPacientes.php');
-    exit();
+    if ($mensagemErro == '') {
+        // Atualizar os dados no banco de dados
+        $query = $conexao->prepare('UPDATE pacientes SET nome=?, email=?, mensagem=?, cpf=?, data=?, profissional=?, procedimento=? WHERE id=?');
+        $query->execute([$nome, $email, $mensagem, $cpf, $data, $profissional, $procedimento, $id]);
+
+        // Redirecionar de volta à página principal
+        header('Location: listarPacientes.php');
+        exit();
+    } else {
+        echo "ERRO DETECTADO: <br>";
+        echo $mensagemErro;
+    }
 }
 
-$indice = $_GET['indice'];
-echo "Índice: $indice";  // Adicione esta linha
-
-
-// Obtenha os dados do paciente com base no índice
-$query = $conexao->prepare('SELECT * FROM pacientes WHERE id=?');
-$query->execute([$indice]);
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+// Obter os dados do paciente do banco de dados
+$query = $conexao->prepare('SELECT * FROM pacientes WHERE id=:id');
+$query->bindParam(':id', $id, PDO::PARAM_INT);
+$query->execute();
 $paciente = $query->fetch(PDO::FETCH_ASSOC);
 
-var_dump($paciente);
+
+    if (!$paciente) {
+        // Se o paciente não for encontrado, você pode redirecionar para uma página de erro ou fazer algo apropriado.
+        echo "Paciente não encontrado.";
+        exit();
+    }
+} else {
+    // header('Location: teste.html');
+    die('Acesso incompatível');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,92 +69,74 @@ var_dump($paciente);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Formulário de Agendamento</title>
     <link rel="stylesheet" href="css/agendarStyle.css">
 </head>
-<br><br><br><br><br><br>
-
-<header>
-    <div class="logo">
-        <a href="index.html"><img src="img/logo.png" alt="logo"></a>
-    </div>
-
-    <nav>
-        <a href="index.html" class="nav-link "> Início</a>
-        <a href="NossosServico.html" class="nav-link">Nosso serviços</a>
-        <a href="agendar.html" class="nav-link active">Agende aqui!</a>
-        <a href="sobre.html" class="nav-link">Sobre nós</a>
-        <a href="contato.html" class="nav-link">Contato</a>
-    </nav>
-
-</header>
 
 <body>
 
-<h1 class="text-form">Formulário de Edição</h1>
+    <header>
+        <div class="logo">
+            <a href="index.html"><img src="img/logo.png" alt="logo"></a>
+        </div>
 
-<section>
-    <form action="" method="post">
+        <nav>
+            <a href="index.html" class="nav-link "> Início</a>
+            <a href="NossosServico.html" class="nav-link">Nosso serviços</a>
+            <a href="agendar.html" class="nav-link active">Agende aqui!</a>
+            <a href="sobre.html" class="nav-link">Sobre nós</a>
+            <a href="contato.html" class="nav-link">Contato</a>
+        </nav>
+    </header>
 
-    <div>
-    <?php if ($paciente && is_array($paciente)) : ?>
-        <label for="nome">Nome:</label><br>
-        <input type="text" id="nome" name="nome" value="<?= $paciente['nome'] ?>" placeholder="Digite seu nome" required><br>
+    <h1>Formulário de Agendamento</h1>
 
-        <label for="email">E-mail:</label><br>
-        <input type="email" id="email" name="email" value="<?= $paciente['email'] ?>" placeholder="exemplo@dominio.com" required><br>
+    <section>
+        <form action="" method="post">
+            <div>
+                <label for="nome">Nome:</label><br>
+                <input type="text" id="nome" name="nome" placeholder="Digite seu nome" value="<?= $paciente['nome'] ?>"><br>
 
-        <label for="mensagem">Mensagem:</label><br>
-        <textarea rows="4" cols="50" id="mensagem" name="mensagem" placeholder="Escreva sua mensagem"><?= $paciente['mensagem'] ?></textarea><br>
+                <label for="email">E-mail:</label><br>
+                <input type="email" id="email" name="email" placeholder="exemplo@dominio.com" value="<?= $paciente['email'] ?>"><br>
 
-        <label for="cpf">CPF:</label>
-        <input type="text" id="cpf" name="cpf" value="<?= $paciente['cpf'] ?>" maxlength="14" placeholder="000.000.000-00" oninput="formatarCPF(this)" required>
-        
-        <label for="data">Data:</label>
-        <input type="date" name="data" value="<?= $paciente['data'] ?>" required><br>
+                <label for="mensagem">Mensagem:</label><br>
+                <textarea rows="4" cols="50" id="mensagem" name="mensagem" placeholder="Escreva sua mensagem"><?= $paciente['mensagem'] ?></textarea><br>
 
-        <label for="profissional">Profissional:</label>
-        <select id="profissional" name="profissional">
-                <option value="Marcelo Arcaico">Dr Marcelo Arcaico</option>
-                <option value="Anna">Drª anna Freitas</option>
-                <option value="Claudia">Drª claudia Alves</option>
-                <option value="Julia">Drª julia Tenório</option>
-            </select><br>
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" name="cpf" maxlength="14" placeholder="000.000.000-00" oninput="formatarCPF(this)" value="<?= $paciente['cpf'] ?>">
 
-            <label for="procedimento">Procedimento:</label>
-              <select id="procedimento" name="procedimento">
-                <option value="Harmonização">Harmonização Facial</option>
-                <option value="Preenchimento">Preenchimento labial</option>
-                <option value="Peeling">Peeling Químico</option>
-                <option value="Botox">Toxina Botulínica</option>
-                <option value="Microagulhamento">Microagulhamento</option>
-                <option value="Drenagem">Drenagem Linfática</option>
-                <option value="Depilação">Depilação a Laser</option>
-            </select><br>
-            <input type="hidden" name="indice" value="<?= $indice ?>">
-        <input type="submit" value="Salvar Alterações" name="salvarEdicao"><br />
-    <?php else : ?>
-        <p>Paciente não encontrado.</p>
-    <?php endif; ?>
-    </form>
-</section>
+                <label for="data">Data:</label>
+                <input type="date" name="data" value="<?= $paciente['data'] ?>"><br>
 
+                <label for="profissional">Profissional:</label>
+                <select id="profissional" name="profissional">
+                    <option value="Marcelo Arcaico" <?= ($paciente['profissional'] == 'Marcelo Arcaico') ? 'selected' : '' ?>>Dr Marcelo Arcaico</option>
+                    <option value="Anna" <?= ($paciente['profissional'] == 'Anna') ? 'selected' : '' ?>>Drª anna Freitas</option>
+                    <option value="Claudia" <?= ($paciente['profissional'] == 'Claudia') ? 'selected' : '' ?>>Drª claudia Alves </option>
+                    <option value="Julia" <?= ($paciente['profissional'] == 'Julia') ? 'selected' : '' ?>>Drª julia Tenório</option>
+                </select><br>
 
+                <label for="procedimento">Procedimento:</label>
+                <select id="procedimento" name="procedimento">
+                    <option value="Harmonização" <?= ($paciente['procedimento'] == 'Harmonização Facial') ? 'selected' : '' ?>>Harmonização Facial</option>
+                    <option value="Preenchimento" <?= ($paciente['procedimento'] == 'Preenchimento labial') ? 'selected' : '' ?>>Preenchimento labial</option>
+                    <option value="Peeling" <?= ($paciente['procedimento'] == 'Peeling Químico') ? 'selected' : '' ?>>Peeling Químico</option>
+                    <option value="Botox" <?= ($paciente['procedimento'] == 'Toxina Botulínica') ? 'selected' : '' ?>>Toxina Botulínica</option>
+                    <option value="Microagulhamento" <?= ($paciente['procedimento'] == 'Microagulhamento') ? 'selected' : '' ?>>Microagulhamento</option>
+                    <option value="Drenagem" <?= ($paciente['procedimento'] == 'Drenagem Linfática') ? 'selected' : '' ?>>Drenagem Linfática</option>
+                    <option value="Depilação" <?= ($paciente['procedimento'] == 'Depilação a Laser') ? 'selected' : '' ?>>Depilação a Laser</option>
+                </select><br>
+
+                <input type="submit" value="Salvar Alterações" name='editar'><br />
+            </div>
+        </form>
     </section>
-    <script src="contato.js"></script>
-    </form>
-
-
-
-    </section>
-
 
     <div class="rodape" id="contato">
         <div class="rodape-div">
-
             <div class="rodape-div-1">
                 <div class="rodape-div-1-coluna">
-                    <!-- elemento -->
                     <span><b>ENDEREÇO</b></span>
                     <p>R. Dr. Jorge de Lima, 113 - Trapiche da Barra, Maceió - AL, 57010-300</p>
                 </div>
@@ -145,18 +144,14 @@ var_dump($paciente);
 
             <div class="rodape-div-2">
                 <div class="rodape-div-2-coluna">
-                    <!-- elemento -->
                     <span><b>Contatos</b></span>
                     <p>Email: Venus.Aesthetics@gmail.com</p>
                     <p>Tel: 82 9958-4003</p>
                 </div>
             </div>
 
-
-
             <div class="rodape-div-4">
                 <div class="rodape-div-4-coluna">
-                    <!-- elemento -->
                     <span><b>Desenvolvido por</b></span>
                     <br>
                     <ul>
@@ -166,17 +161,12 @@ var_dump($paciente);
                         <li>José Gabriel</li>
                         <li>Felipe Nascimento</li>
                         <li>Marcelo Oliveira</li>
-
-
                     </ul>
                 </div>
             </div>
-
         </div>
         <p class="rodape-direitos">Copyright © 2023 – Todos os Direitos Reservados.</p>
     </div>
-
-
 </body>
 
 </html>
