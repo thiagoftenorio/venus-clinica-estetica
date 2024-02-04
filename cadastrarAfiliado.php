@@ -36,18 +36,20 @@ if ($mensagemErro != '') {
     echo "ERRO DETECTADO: <br/>";
     echo $mensagemErro;
 } else {
-    $afiliado = array(
-        'nome' => $nome,
-        'email' => $email,
-        'endereco' => $endereco,
-        'numero' => $numero,
-        'bairro' => $bairro,
-        'cidade' => $cidade,
-        'estado' => $estado
-    );
+    try{
+    // Conexão com o banco de dados (substitua os valores pelos seus próprios)
+    $pdo = new PDO('mysql:host=localhost;dbname=venus', 'root', '');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $_SESSION['listarAfiliados'][] = $afiliado;
+    // Preparar e executar a instrução SQL de inserção
+    $stmt = $pdo->prepare("INSERT INTO afiliados (nome, email, endereco, numero, bairro, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$nome, $email, $endereco, $numero, $bairro, $cidade, $estado]);
 
-    header('Location:listarAfiliados.php');
+    // Redirecionar para a página listarAfiliados.php
+    header('Location: listarAfiliados.php');
+} catch (PDOException $e) {
+    echo "Erro ao conectar ao banco de dados: " . $e->getMessage();
+}
+
 }
 ?>

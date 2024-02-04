@@ -1,21 +1,54 @@
 <?php
 session_start();
 
+// Conectar ao banco de dados (substitua as credenciais conforme necessário)
+$dsn = 'mysql:host=localhost;dbname=venus';
+$usuario_bd = 'root';
+$senha_bd = '';
+
+try {
+    $conexao = new PDO($dsn, $usuario_bd, $senha_bd);
+    $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo 'Erro na conexão com o banco de dados: ' . $e->getMessage();
+    exit();
+}
+
 // Inicialize $_SESSION['listarAfiliados'] como um array vazio se não estiver definido
 if (!isset($_SESSION['listarAfiliados'])) {
     $_SESSION['listarAfiliados'] = array();
 }
 
 if (isset($_POST['deletar'])) {
-    echo $_POST['indice'];
-    unset($_SESSION['listarAfiliados'][$_POST['indice']]);
+    $indiceDeletar = $_POST['indice'];
+
+    // Obtenha o ID do afiliado que deseja deletar
+    $idAfiliadoDeletar = $_SESSION['listarAfiliados'][$indiceDeletar]['id'];
+
+    // Execute a exclusão no banco de dados
+    $queryDelete = $conexao->prepare('DELETE FROM afiliados WHERE id=:id');
+    $queryDelete->bindParam(':id', $idAfiliadoDeletar, PDO::PARAM_INT);
+    $queryDelete->execute();
+
+    // Remova o afiliado da lista de sessão
+    unset($_SESSION['listarAfiliados'][$indiceDeletar]);
+
+    // Redirecione de volta à página principal
+    header('Location: listarAfiliados.php');
+    exit();
 }
 
 if (isset($_POST['editar'])) {
-    echo $_POST['indice'];
-    header('Location: editarAfiliado.php?id=' .$_POST ['indice']);
+    $indiceEditar = $_POST['indice'];
+    $idAfiliadoEditar = $_SESSION['listarAfiliados'][$indiceEditar]['id'];
+    header("Location: editarAfiliado.php?id=$idAfiliadoEditar");
+    exit();
 }
+
+// Fechar a conexão no final do script
+$conexao = null;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,11 +60,10 @@ if (isset($_POST['editar'])) {
 <body>
 
 <header>
-      <div class="logo">
-          <a href="index.html" ><img src="img/logo.png" alt="logo"></a>
-      </div>
-
-      <nav>
+    <div class="logo">
+        <a href="index.html" ><img src="img/logo.png" alt="logo"></a>
+    </div>
+    <nav>
         <a href="index.html" class="nav-link "> Início</a>
         <a href="NossosServico.html" class="nav-link">Nosso serviços</a>
         <a href="agendar.html" class="nav-link">Agende aqui!</a>
@@ -42,47 +74,43 @@ if (isset($_POST['editar'])) {
 
 <br><br><br><br><br><br><br>
 
-
- <h1 class = "text-form">Lista de Afiliados</h1>
-
-
+<h1 class="text-form">Lista de Afiliados</h1>
 
 <main>
-<table class = "tabela">
-    <tr>
-        <th>id</th>
-        <th>Nome</th>
-        <th>E-mail</th>
-        <th>Endereço</th>
-        <th>Número</th>
-        <th>Bairro</th>
-        <th>Cidade</th>
-        <th>Estado</th>
-        <th>Editar</th>
-        <th>Deletar</th>
+    <table class="tabela">
+        <tr>
+            <th>id</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Endereço</th>
+            <th>Número</th>
+            <th>Bairro</th>
+            <th>Cidade</th>
+            <th>Estado</th>
+            <th>Editar</th>
+            <th>Deletar</th>
+        </tr>
 
-    </tr>
-
-    <?php
-    foreach ($_SESSION['listarAfiliados'] as $key => $value) {
-        echo "<form action='' method='post'>";
-        echo "<tr>";
-        echo "<td>$key</td>";
-        echo "<td>".$value['nome']."</td>";
-        echo "<td>".$value['email']."</td>";
-        echo "<td>".$value['endereco']."</td>";
-        echo "<td>".$value['numero']."</td>";
-        echo "<td>".$value['bairro']."</td>";
-        echo "<td>".$value['cidade']."</td>";
-        echo "<td>".$value['estado']."</td>";
-        echo "<td ><input type='submit' name='editar' value='Editar' class='botao-editar'/></td>";
+        <?php
+        foreach ($_SESSION['listarAfiliados'] as $key => $value) {
+            echo "<form action='' method='post'>";
+            echo "<tr>";
+            echo "<td>".$value['id']."</td>";
+            echo "<td>".$value['nome']."</td>";
+            echo "<td>".$value['email']."</td>";
+            echo "<td>".$value['endereco']."</td>";
+            echo "<td>".$value['numero']."</td>";
+            echo "<td>".$value['bairro']."</td>";
+            echo "<td>".$value['cidade']."</td>";
+            echo "<td>".$value['estado']."</td>";
+            echo "<td><input type='submit' name='editar' value='Editar' class='botao-editar'/></td>";
             echo "<td><input type='submit' name='deletar' value='Deletar' class='botao-deletar'/></td>";
-        echo "<input type='hidden' name='indice' value='$key'/>";
-        echo "</tr>";
-        echo "</form>";
-    }
-    ?>
-</table>
+            echo "<input type='hidden' name='indice' value='$key'/>";
+            echo "</tr>";
+            echo "</form>";
+        }
+        ?>
+    </table>
 </main>
 
 <div class="rodape" id="contato">
