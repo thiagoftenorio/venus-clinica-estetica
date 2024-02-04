@@ -1,45 +1,71 @@
 <?php
+var_dump($_POST);
 session_start();
+$mensagemErro = '';
+
+// Conectar ao banco de dados (substitua as credenciais conforme necessário)
+$dsn = 'mysql:host=localhost;dbname=venus';
+$usuario_bd = 'root';
+$senha_bd = '';
+
+try {
+    $conexao = new PDO($dsn, $usuario_bd, $senha_bd);
+    $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo 'Erro na conexão com o banco de dados: ' . $e->getMessage();
+    exit();
+}
+
 if (isset($_POST['editar'])) {
+    $id = isset($_GET['id']) ? $_GET['id'] : null;
     $nome = $_POST['nome'];
     $email = $_POST['email'];
-    $escolaridade = $_POST['escolaridade'];
-    $funcao = $_POST['funcao'];
-    $linkedin = $_POST['linkedin'];
-    $mensagemErro = '';
+    $mensagem = $_POST['mensagem'];
+    $cpf = $_POST['cpf'];
+    $data = $_POST['data'];
+    $profissional = $_POST['profissional'];
+    $procedimento = $_POST['procedimento'];
 
-    if (empty($nome)) {
-        $mensagemErro .= 'Nome vazio<br/>';
-    }
-    if (empty($email)) {
-        $mensagemErro .= 'E-mail vazio<br/>';
-    }
-    if (empty($linkedin)) {
-        $mensagemErro .= 'LinkedIn vazio<br/>';
+
+    // Validar os campos
+    if ($nome == '' || $email == '' || $cpf == '' || $data == '') {
+        $mensagemErro .= 'Nome, E-mail, CPF e Data são campos obrigatórios.<br/>';
     }
 
-    if ($mensagemErro != '') {
+    if ($mensagemErro == '') {
+        // Atualizar os dados no banco de dados
+        $query = $conexao->prepare('UPDATE candidato SET nome=?, email=?, mensagem=?, cpf=?, data=?, profissional=?, procedimento=? WHERE id=?');
+        $query->execute([$nome, $email, $mensagem, $cpf, $data, $profissional, $procedimento, $id]);
+
+        // Redirecionar de volta à página principal
+        header('Location: listarCandidatos.php');
+        exit();
+    } else {
         echo "ERRO DETECTADO: <br>";
         echo $mensagemErro;
-    } else {
-        $candidato = array(
-            'nome' => $nome,
-            'email' => $email,
-            'escolaridade' => $escolaridade,
-            'funcao' => $funcao,
-            'linkedin' => $linkedin,
-        );
-        $_SESSION['listarcandidatos'][$_GET['id']] = $candidato;
-        header('Location: listarcandidatos.php');
     }
 }
 
 if (isset($_GET['id'])) {
-    $candidato = $_SESSION['listarcandidatos'][$_GET['id']];
+    $id = $_GET['id'];
+
+    // Obter os dados do candidato do banco de dados
+    $query = $conexao->prepare('SELECT * FROM candidato WHERE id=:id');
+    $query->bindParam(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    $candidato = $query->fetch(PDO::FETCH_ASSOC);
+
+    if (!$candidato) {
+        // Se o candidato não for encontrado, você pode redirecionar para uma página de erro ou fazer algo apropriado.
+        echo "candidato não encontrado.";
+        exit();
+    }
 } else {
     die('Acesso incompatível');
 }
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,7 +94,7 @@ if (isset($_GET['id'])) {
     <div>
         <h1>Formulário de Edição de Candidato</h1>
         <section>
-            <form action="" method="post">
+            <form action="" method="$_POST">
                 <div>
                     <label for="nome">Nome:</label><br>
                     <input type="text" id="nome" name="nome" value="<?php echo $candidato['nome']; ?>"><br>
@@ -92,8 +118,10 @@ if (isset($_GET['id'])) {
 
                     <label for="linkedin">LinkedIn:</label><br>
                     <input type="text" id="linkedin" name="linkedin" value="<?php echo $candidato['linkedin']; ?>"><br>
+
                     <input type="submit" value="Salvar Alterações" name="editar"> <br />
-                    <input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
+
+                    
                 </div>
             </form>
         </section>

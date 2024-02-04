@@ -1,29 +1,56 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['listarcandidatos'])) {
-    $_SESSION['listarcandidatos'] = array();
+// Conectar ao banco de dados (substitua as credenciais conforme necessário)
+$dsn = 'mysql:host=localhost;dbname=venus';
+$usuario_bd = 'root';
+$senha_bd = '';
+
+try {
+    $conexao = new PDO($dsn, $usuario_bd, $senha_bd);
+    $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo 'Erro na conexão com o banco de dados: ' . $e->getMessage();
+    exit();
 }
 
-if (isset($_POST['deletar'])) {
-    if (isset($_POST['indice'])) {
-        $indice = $_POST['indice'];
-        if (isset($_SESSION['listarcandidatos'][$indice])) {
-            unset($_SESSION['listarcandidatos'][$indice]);
-        }
-    }
+// Inicializar $_SESSION['listarcandidatos'] com dados do banco de dados
+$query = $conexao->query('SELECT * FROM candidato');
+$_SESSION['listarcandidatos'] = $query->fetchAll(PDO::FETCH_ASSOC);
+
+if (isset($_GET['deletar'])) {
+    $indiceDeletar = $_GET['deletar'];
+
+  
+        // Obter o ID do candidato que deseja deletar
+        $idCandidatoDeletar = $_SESSION['listarcandidatos'][$indiceDeletar]['id'];
+
+        // Execute a exclusão no banco de dados
+        $queryDelete = $conexao->prepare('DELETE FROM candidato WHERE id=:id');
+        $queryDelete->bindParam(':id', $idCandidatoDeletar, PDO::PARAM_INT);
+        $queryDelete->execute();
+
+        // Remova o Candidato da lista de sessão
+        unset($_SESSION['listarcandidatos'][$indiceDeletar]);
+
+        // Redirecione de volta à página principal
+        header('Location: listarcandidatos.php');
+        exit();
+    
 }
+
 
 if (isset($_POST['editar'])) {
-    if (isset($_POST['indice'])) {
         $indice = $_POST['indice'];
-        if (isset($_SESSION['listarcandidatos'][$indice])) {
-            header('Location: editarCandidatos.php?id=' . $indice);
-            exit; // You should exit after a header redirect
-        }
-    }
+        header("Location: editarCandidatos.php?indice=$indice");
+         exit();
 }
+
+// Fechar a conexão no final do script
+$conexao = null;
 ?>
+
+
 
 <!DOCTYPEs html>
 <html lang="en">
@@ -73,14 +100,14 @@ if (isset($_POST['editar'])) {
         foreach ($_SESSION['listarcandidatos'] as $key => $value) {
             echo "<form action='' method='post'>";
             echo "<tr>";
-            echo "<td>".$key."</td>";
+            echo "<td>".$value['id']."</td>";
             echo "<td>".$value['nome']."</td>";
             echo "<td>".$value['email']."</td>";
             echo "<td>".$value['escolaridade']."</td>";
             echo "<td>".$value['funcao']."</td>";
             echo "<td>".$value['linkedin']."</td>";
-            echo "<td ><input type='submit' name='editar' value='Editar' class='botao-editar'/></td>";
-            echo "<td><input type='submit' name='deletar' value='Deletar' class='botao-deletar'/></td>";
+            echo "<td><a href='editarCandidatos.php?id=" . $value['id'] . "'>Editar</a></td>";
+            echo "<td><a href='listarcandidatos.php?deletar=$key'>Deletar</a></td>";
             echo "<input type='hidden' name='indice' value='$key'/>";
             echo "<input type='hidden' name='nome' value='" . $value['nome'] . "'>";
             echo "<input type='hidden' name='email' value='" . $value['email'] . "'>";

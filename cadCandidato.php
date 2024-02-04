@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 $nome = $_POST['nome']; 
 $email = $_POST['email'];
 $escolaridade = $_POST['escolaridade'];
@@ -7,6 +8,7 @@ $funcao = $_POST['funcao'];
 $linkedin = $_POST['linkedin'];
 $mensagemErro = '';
 
+// Validação dos campos
 if (empty($nome)) {
     $mensagemErro .= 'Nome vazio<br/>';
 }
@@ -27,22 +29,19 @@ if ($mensagemErro != '') {
     echo "ERRO DETECTADO: <br/>";
     echo $mensagemErro;
 } else {
-    // Inicialize a sessão como um array se ainda não estiver
-    if (!isset($_SESSION['listarcandidatos'])) {
-        $_SESSION['listarcandidatos'] = array();
+    try {
+        // Conexão com o banco de dados (substitua os valores pelos seus próprios)
+        $pdo = new PDO('mysql:host=localhost;dbname=venus', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Preparar e executar a instrução SQL de inserção
+        $stmt = $pdo->prepare("INSERT INTO candidato (nome, email, escolaridade, funcao, linkedin) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$nome, $email, $escolaridade, $funcao, $linkedin]);
+
+        // Redirecionar para a página listarcandidatos.php
+        header('Location: listarcandidatos.php');
+    } catch (PDOException $e) {
+        echo "Erro ao conectar ao banco de dados: " . $e->getMessage();
     }
-
-    $candidato = array(
-        'nome' => $nome,
-        'email' => $email,
-        'escolaridade' => $escolaridade,
-        'funcao' => $funcao,
-        'linkedin' => $linkedin,
-    );
-
-    $_SESSION['listarcandidatos'][] = $candidato;
-
-    // Redirecione para a página listarcandidatos.php
-    header('Location: listarcandidatos.php');
 }
 ?>
