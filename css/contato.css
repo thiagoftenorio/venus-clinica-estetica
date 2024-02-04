@@ -24,7 +24,7 @@ body {
 a:hover {
     text-decoration: none;
   }
-  
+
   header {
     position: fixed;
     top: 0;
@@ -32,42 +32,42 @@ a:hover {
     right: 0;
     display: flex;
     height: 15vh;
-    background-color: rgba(231, 206, 253, 0.9); 
+    background-color: rgba(231, 206, 253, 0.9);
     justify-content: space-between;
     align-items: center;
     padding: 3.5vh;
     z-index: 999;
-    transition: background-color 0.3s ease; 
+    transition: background-color 0.3s ease;
   }
 
   .logo {
     display: flex;
     align-items: center;
   }
-  
+
   .logo img {
     margin-top: 8%;
-    height: 45vh; 
-    max-width: 48vh; 
+    height: 45vh;
+    max-width: 48vh;
   }
-  
-  nav { 
-    flex-grow: 1; 
+
+  nav {
+    flex-grow: 1;
     display: flex;
     align-items: center;
     margin-left: 1%;
   }
-  
+
   nav a {
     margin-left: 10vh;
     color: #7927c5;
-    white-space: nowrap; 
+    white-space: nowrap;
   }
 
   nav a:hover {
     border-bottom: 2px solid #7927c5;
   }
-  
+
   nav a.active {
     border-bottom: 2px solid #7927c5;
   }
@@ -103,57 +103,48 @@ a:hover {
 }
 
 
-.zap {
+.zap img, .insta img {
   width: 17vh;
   height: 17vh;
-  background: url("/img/zap1.png");
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-  opacity: 1;
+  object-fit: cover;
+  border-radius: 10vh; /* Ajusta para bordas arredondadas */
+  box-shadow: 1vh 1vh 1vh #40387980;
+}
+
+.zap {
   position: absolute;
   top: 15vh;
   left: 65vh;
-  overflow: hidden;
-  box-shadow: 1vh 1vh 1vh #40387980;
-  border-radius: 10vh;
 }
-.insta{
-  width: 17vh;
-  height: 17vh;
-  background: url("/img/ig.png");
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-  opacity: 1;
+
+.insta {
   position: absolute;
   top: 15vh;
   left: 15vh;
-  overflow: hidden;
-  box-shadow: 1vh 1vh 1vh #40387980;
-  border-radius: 10vh;
 }
-.face{
+
+
+
+.face img {
   width: 17vh;
   height: 17vh;
-  background: url("/img/fb.png");
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-  opacity: 1;
+  border-radius: 50%; /* Isso torna a imagem circular */
+  object-fit: cover; /* Isso garante que a imagem cubra o espaço sem distorcer */
   position: absolute;
   top: 15vh;
   left: 40vh;
-  box-shadow: 1vh 1vh 1vb #40387980;
-  border-radius: 100vh;
+  box-shadow: 1vh 1vh 1vh #40387980;
 }
+
+
+
 
 .frase {
   position: absolute;
   height: 8vh;
   width: 110vh;
   left: -7vh;
-  top: 2vh;   
+  top: 2vh;
   background: #BB6BD9;
   border-radius: 2vh;
   box-shadow: 1vh 3vh 5vh #40387980;

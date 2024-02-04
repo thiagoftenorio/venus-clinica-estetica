@@ -1,5 +1,4 @@
 <?php
-var_dump($_POST);
 session_start();
 $mensagemErro = '';
 
@@ -20,22 +19,20 @@ if (isset($_POST['editar'])) {
     $id = isset($_GET['id']) ? $_GET['id'] : null;
     $nome = $_POST['nome'];
     $email = $_POST['email'];
-    $mensagem = $_POST['mensagem'];
-    $cpf = $_POST['cpf'];
-    $data = $_POST['data'];
-    $profissional = $_POST['profissional'];
-    $procedimento = $_POST['procedimento'];
-
+    $escolaridade = $_POST['escolaridade'];
+    $funcao = $_POST['funcao'];
+    $linkedin = $_POST['linkedin'];
 
     // Validar os campos
-    if ($nome == '' || $email == '' || $cpf == '' || $data == '') {
-        $mensagemErro .= 'Nome, E-mail, CPF e Data são campos obrigatórios.<br/>';
+    if ($nome == '' || $email == '' || $linkedin == '') {
+
+        $mensagemErro .= 'Nome, E-mail e LinkedIN são campos obrigatórios.<br/>';
     }
 
     if ($mensagemErro == '') {
         // Atualizar os dados no banco de dados
-        $query = $conexao->prepare('UPDATE candidato SET nome=?, email=?, mensagem=?, cpf=?, data=?, profissional=?, procedimento=? WHERE id=?');
-        $query->execute([$nome, $email, $mensagem, $cpf, $data, $profissional, $procedimento, $id]);
+        $query = $conexao->prepare('UPDATE candidato SET nome=?, email=?, escolaridade=?, funcao=?, linkedin=? WHERE id=?');
+        $query->execute([$nome, $email, $escolaridade, $funcao, $linkedin, $id]);
 
         // Redirecionar de volta à página principal
         header('Location: listarCandidatos.php');
@@ -45,6 +42,7 @@ if (isset($_POST['editar'])) {
         echo $mensagemErro;
     }
 }
+
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -68,14 +66,16 @@ if (isset($_GET['id'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Candidato</title>
     <link rel="stylesheet" href="css/agendarStyle.css">
 </head>
+
 <body>
-<header>
+    <header>
         <div class="logo">
             <a href="index.html"><img src="img/logo.png" alt="logo"></a>
         </div>
@@ -94,7 +94,8 @@ if (isset($_GET['id'])) {
     <div>
         <h1>Formulário de Edição de Candidato</h1>
         <section>
-            <form action="" method="$_POST">
+        <form action="" method="post">
+
                 <div>
                     <label for="nome">Nome:</label><br>
                     <input type="text" id="nome" name="nome" value="<?php echo $candidato['nome']; ?>"><br>
@@ -121,16 +122,16 @@ if (isset($_GET['id'])) {
 
                     <input type="submit" value="Salvar Alterações" name="editar"> <br />
 
-                    
+
                 </div>
             </form>
         </section>
     </div>
 
-    
-    <div class="rodape" id="contato">
-        <div class="rodape-div">
 
+    <footer class="rodape" id="contato">
+        <div class="rodape-div">
+      
             <div class="rodape-div-1">
                 <div class="rodape-div-1-coluna">
                     <!-- elemento -->
@@ -138,40 +139,40 @@ if (isset($_GET['id'])) {
                     <p>R. Dr. Jorge de Lima, 113 - Trapiche da Barra, Maceió - AL, 57010-300</p>
                 </div>
             </div>
-
+      
             <div class="rodape-div-2">
                 <div class="rodape-div-2-coluna">
                     <!-- elemento -->
                     <span><b>Contatos</b></span>
-                    <p>Email: Venus.Aesthetics@gmail.com</p>
-                    <p>Tel: 82 9958-4003</p>
-                    <a href="candidato.html">Trabalhe conosco</a>
+                    <p>Email:  Venus.Aesthetics@gmail.com</p>
+                    <p>Tel:  82 9958-4003</p>
+                    <a href="candidato.html">Trabalhe conosco</a><br>
+                    <a href="filiado.html"> Que se tornar um afiliado?</a>
                 </div>
             </div>
-
-
-
+      
             <div class="rodape-div-4">
                 <div class="rodape-div-4-coluna">
                     <!-- elemento -->
                     <span><b>Desenvolvido por</b></span>
                     <br>
-                    <ul>
-                        <li>Kássio Oliveira</li>
-                        <li>Thiago de Freitas</li>
-                        <li>Erickson Marcel</li>
-                        <li>José Gabriel</li>
-                        <li>Felipe Nascimento</li>
-                        <li>Marcelo Oliveira</li>
-
-
+                <ul>
+                    <li>Kássio Oliveira</li>
+                    <li>Thiago de Freitas</li>
+                    <li>Erickson Marcel</li>
+                    <li>José Gabriel</li>
+                    <li>Felipe Nascimento</li>
+                    <li>Marcelo Oliveira</li>
+    
+      
                     </ul>
                 </div>
             </div>
-
+      
         </div>
         <p class="rodape-direitos">Copyright © 2023 – Todos os Direitos Reservados.</p>
-    </div>
+    </footer>
 
 </body>
+
 </html>

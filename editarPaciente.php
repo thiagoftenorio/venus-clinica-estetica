@@ -46,11 +46,11 @@ if (isset($_POST['editar'])) {
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-// Obter os dados do paciente do banco de dados
-$query = $conexao->prepare('SELECT * FROM pacientes WHERE id=:id');
-$query->bindParam(':id', $id, PDO::PARAM_INT);
-$query->execute();
-$paciente = $query->fetch(PDO::FETCH_ASSOC);
+    // Obter os dados do paciente do banco de dados
+    $query = $conexao->prepare('SELECT * FROM pacientes WHERE id=:id');
+    $query->bindParam(':id', $id, PDO::PARAM_INT);
+    $query->execute();
+    $paciente = $query->fetch(PDO::FETCH_ASSOC);
 
 
     if (!$paciente) {
@@ -88,6 +88,8 @@ $paciente = $query->fetch(PDO::FETCH_ASSOC);
             <a href="contato.html" class="nav-link">Contato</a>
         </nav>
     </header>
+
+    <br><br><br><br><br><br>
 
     <h1>Formulário de Agendamento</h1>
 
@@ -133,40 +135,49 @@ $paciente = $query->fetch(PDO::FETCH_ASSOC);
         </form>
     </section>
 
-    <div class="rodape" id="contato">
+    <footer class="rodape" id="contato">
         <div class="rodape-div">
+      
             <div class="rodape-div-1">
                 <div class="rodape-div-1-coluna">
+                    <!-- elemento -->
                     <span><b>ENDEREÇO</b></span>
                     <p>R. Dr. Jorge de Lima, 113 - Trapiche da Barra, Maceió - AL, 57010-300</p>
                 </div>
             </div>
-
+      
             <div class="rodape-div-2">
                 <div class="rodape-div-2-coluna">
+                    <!-- elemento -->
                     <span><b>Contatos</b></span>
-                    <p>Email: Venus.Aesthetics@gmail.com</p>
-                    <p>Tel: 82 9958-4003</p>
+                    <p>Email:  Venus.Aesthetics@gmail.com</p>
+                    <p>Tel:  82 9958-4003</p>
+                    <a href="candidato.html">Trabalhe conosco</a><br>
+                    <a href="filiado.html"> Que se tornar um afiliado?</a>
                 </div>
             </div>
-
+      
             <div class="rodape-div-4">
                 <div class="rodape-div-4-coluna">
+                    <!-- elemento -->
                     <span><b>Desenvolvido por</b></span>
                     <br>
-                    <ul>
-                        <li>Kássio Oliveira</li>
-                        <li>Thiago de Freitas</li>
-                        <li>Erickson Marcel</li>
-                        <li>José Gabriel</li>
-                        <li>Felipe Nascimento</li>
-                        <li>Marcelo Oliveira</li>
+                <ul>
+                    <li>Kássio Oliveira</li>
+                    <li>Thiago de Freitas</li>
+                    <li>Erickson Marcel</li>
+                    <li>José Gabriel</li>
+                    <li>Felipe Nascimento</li>
+                    <li>Marcelo Oliveira</li>
+    
+      
                     </ul>
                 </div>
             </div>
+      
         </div>
         <p class="rodape-direitos">Copyright © 2023 – Todos os Direitos Reservados.</p>
-    </div>
+    </footer>
 </body>
 
 </html>

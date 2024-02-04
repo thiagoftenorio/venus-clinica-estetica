@@ -14,13 +14,13 @@ try {
     exit();
 }
 
-// Inicialize $_SESSION['listarAfiliados'] como um array vazio se não estiver definido
-if (!isset($_SESSION['listarAfiliados'])) {
-    $_SESSION['listarAfiliados'] = array();
-}
+// Inicializar $_SESSION['listarAfiliados'] com dados do banco de dados
+$query = $conexao->query('SELECT * FROM afiliados');
+$_SESSION['listarAfiliados'] = $query->fetchAll(PDO::FETCH_ASSOC);
 
-if (isset($_POST['deletar'])) {
-    $indiceDeletar = $_POST['indice'];
+
+if (isset($_GET['deletar'])) {
+    $indiceDeletar = $_GET['deletar'];
 
     // Obtenha o ID do afiliado que deseja deletar
     $idAfiliadoDeletar = $_SESSION['listarAfiliados'][$indiceDeletar]['id'];
@@ -39,8 +39,7 @@ if (isset($_POST['deletar'])) {
 }
 
 if (isset($_POST['editar'])) {
-    $indiceEditar = $_POST['indice'];
-    $idAfiliadoEditar = $_SESSION['listarAfiliados'][$indiceEditar]['id'];
+    $indice = $_POST['indice'];
     header("Location: editarAfiliado.php?id=$idAfiliadoEditar");
     exit();
 }
@@ -69,6 +68,7 @@ $conexao = null;
         <a href="agendar.html" class="nav-link">Agende aqui!</a>
         <a href="sobre.html" class="nav-link">Sobre nós</a>
         <a href="contato.html" class="nav-link active">Contato</a>
+        <a href="filiado.html" class="nav-link">Novo Afiliado</a>
     </nav>
 </header>
 
@@ -103,19 +103,25 @@ $conexao = null;
             echo "<td>".$value['bairro']."</td>";
             echo "<td>".$value['cidade']."</td>";
             echo "<td>".$value['estado']."</td>";
-            echo "<td><input type='submit' name='editar' value='Editar' class='botao-editar'/></td>";
-            echo "<td><input type='submit' name='deletar' value='Deletar' class='botao-deletar'/></td>";
+            echo "<td><a href='editarAfiliado.php?id=" . $value['id'] . "'>Editar</a></td>";
+            echo "<td><a href='listarAfiliados.php?deletar=$key'>Deletar</a></td>";
             echo "<input type='hidden' name='indice' value='$key'/>";
+            echo "<input type='hidden' name='nome' value='" . $value['nome'] . "'>";
+            echo "<input type='hidden' name='email' value='" . $value['email'] . "'>";
+            echo "<input type='hidden' name='endereco' value='" . $value['endereco'] . "'>";
+            echo "<input type='hidden' name='numero' value='" . $value['endereco'] . "'>";
+            echo "<input type='hidden' name='bairro' value='" . $value['bairro'] . "'>";
+            echo "<input type='hidden' name='cidade' value='" . $value['cidade'] . "'>";
+            echo "<input type='hidden' name='estado' value='" . $value['estado'] . "'>";
             echo "</tr>";
             echo "</form>";
         }
         ?>
     </table>
 </main>
-
-<div class="rodape" id="contato">
+<footer class="rodape" id="contato">
         <div class="rodape-div">
-
+      
             <div class="rodape-div-1">
                 <div class="rodape-div-1-coluna">
                     <!-- elemento -->
@@ -123,38 +129,38 @@ $conexao = null;
                     <p>R. Dr. Jorge de Lima, 113 - Trapiche da Barra, Maceió - AL, 57010-300</p>
                 </div>
             </div>
-
+      
             <div class="rodape-div-2">
                 <div class="rodape-div-2-coluna">
                     <!-- elemento -->
                     <span><b>Contatos</b></span>
-                    <p>Email: Venus.Aesthetics@gmail.com</p>
-                    <p>Tel: 82 9958-4003</p>
+                    <p>Email:  Venus.Aesthetics@gmail.com</p>
+                    <p>Tel:  82 9958-4003</p>
+                    <a href="candidato.html">Trabalhe conosco</a><br>
+                    <a href="filiado.html"> Que se tornar um afiliado?</a>
                 </div>
             </div>
-
-
-
+      
             <div class="rodape-div-4">
                 <div class="rodape-div-4-coluna">
                     <!-- elemento -->
                     <span><b>Desenvolvido por</b></span>
                     <br>
-                    <ul>
-                        <li>Kássio Oliveira</li>
-                        <li>Thiago de Freitas</li>
-                        <li>Erickson Marcel</li>
-                        <li>José Gabriel</li>
-                        <li>Felipe Nascimento</li>
-                        <li>Marcelo Oliveira</li>
-
-
+                <ul>
+                    <li>Kássio Oliveira</li>
+                    <li>Thiago de Freitas</li>
+                    <li>Erickson Marcel</li>
+                    <li>José Gabriel</li>
+                    <li>Felipe Nascimento</li>
+                    <li>Marcelo Oliveira</li>
+    
+      
                     </ul>
                 </div>
             </div>
-
+      
         </div>
         <p class="rodape-direitos">Copyright © 2023 – Todos os Direitos Reservados.</p>
-    </div>
+      </footer>
 </body>
 </html>
